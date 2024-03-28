@@ -28,5 +28,6 @@ class GenRandPoint():
         plt.show()
 
 
+print(123)
 z = GenRandPoint(8, 8, 10)
 GenRandPoint.draw(self=z)
