@@ -27,6 +27,6 @@ class GenRandPoint():
         plt.ylim([3.5, 4.5])
         plt.show()
 
-print()
+
 z = GenRandPoint(8, 8, 10)
 GenRandPoint.draw(self=z)
