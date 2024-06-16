@@ -172,7 +172,7 @@ class GraphGenerator():
         #print()
         return np.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2)
 
-    def abc(self):
+    def generateGraph(self):
         pos = dict(enumerate(self.sample, 0))
         #print(pos)
         G = nx.Graph()
@@ -243,7 +243,7 @@ class DrawGraph():
         def drawTheEntireGraph(self):
             G = self.G
             pos = dict(enumerate(self.sample, 0))
-
+            fig = plt.figure(figsize=(8, 6))
             elarge = [(u, v) for (u, v, d) in G.edges(data=True) if d["weight"] > 0.5]
             esmall = [(u, v) for (u, v, d) in G.edges(data=True) if d["weight"] <= 0.5]
 
@@ -274,6 +274,7 @@ class DrawGraph():
             ax.margins(0.08)
             plt.axis("off")
             plt.tight_layout()
+            fig.canvas.manager.set_window_title('График: граф сенсоров')
             plt.show()
 
         def draw(G, pos, with_labels=True, font_weight='bold', node_size=700, node_color='skyblue', font_size=8,
@@ -291,11 +292,12 @@ class DrawGraph():
             nx.draw(G, pos, with_labels=with_labels, font_weight=font_weight, node_size=node_size,
                     node_color=node_colors, font_size=font_size, edge_color=edge_color)
 
-        def drawClusters(self, groups):
+        def drawClusters(self, groups, clusters):
             Graph = self.G
             pos = dict(enumerate(self.sample, 0))
-            g = Clustering.graphDivision(Clustering(Graph), groups)
+            g = clusters
 
+            fig = plt.figure(figsize=(8, 6))
             # draw nodes
             node_color = 'skyblue'
             node_colors = []
@@ -307,11 +309,11 @@ class DrawGraph():
             ax = plt.gca()
             ax.margins(0.08)
             plt.axis("off")
-            #plt.tight_layout()
+            fig.canvas.manager.set_window_title('График: сенсоры, разибтые на кластеры')
             plt.show()
 
         def drawCmap(clusters, sample):
-            plt.figure(figsize=(8, 6))
+            fig = plt.figure(figsize=(8, 6))
             pos = dict(enumerate(sample, 0))
             for i in range(0, len(clusters)):
                 # Получаем значения charge для всех узлов
@@ -333,7 +335,7 @@ class DrawGraph():
                 sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
                 sm.set_array([])
                 #plt.colorbar(sm, label='сharge')
-
+            fig.canvas.manager.set_window_title('График: заряд сенсоров после передачи данных')
             plt.show()
 
 
@@ -344,7 +346,7 @@ class ProbabilityDependencies():
         f_values = np.arange(20, 101, 10)  # от 20 до 100 с шагом 10
 
         # Построение графиков для p1 и p2 по r при изменяющемся f
-        plt.figure(figsize=(12, 6))
+        fig1 = plt.figure(figsize=(12, 6))
         for f in f_values:
             p1_values = [DeterminingTheEdgeWeight.p1(r, f) for r in r_values]
             p2_values = [DeterminingTheEdgeWeight.p2(r, f) for r in r_values]
@@ -355,10 +357,11 @@ class ProbabilityDependencies():
         plt.title('Графики зависимости вероятности от расстояния между сенсорами при разных частотах')
         plt.legend()
         plt.grid(True)
+        fig1.canvas.manager.set_window_title('График: p1 и p2 по f при изменяющемся r')
         plt.show()
 
         # Построение графиков для p1 и p2 по f при изменяющемся r
-        plt.figure(figsize=(12, 6))
+        fig2 = plt.figure(figsize=(12, 6))
         for r in r_values:
             p1_values = [DeterminingTheEdgeWeight.p1(r, f) for f in f_values]
             p2_values = [DeterminingTheEdgeWeight.p2(r, f) for f in f_values]
@@ -369,11 +372,18 @@ class ProbabilityDependencies():
         plt.title('Графики зависимости вероятности от частоты передачи данных при разных расстояниях')
         plt.legend()
         plt.grid(True)
+        fig2.canvas.manager.set_window_title('График: p1 и p2 по r при изменяющемся f')
         plt.show()
 
-
+'''
+height = int(input("Введите высоту акватории: "))
+width = int(input("Введите ширину акватории: "))
+rho = int(input("Введите плотность сенсоров: "))
+number_of_references = int(input("Введите количество референсов: "))
+dist = int(input("Введите расстояние для связи: "))
+'''
 sample = PointGenerator.gen(PointGenerator(10, 10, 0.3, 3))
-graph = GraphGenerator.abc(GraphGenerator(sample, 5, 300))
+graph = GraphGenerator.generateGraph(GraphGenerator(sample, 5, 300))
 groups = Clustering.createGroups(Clustering(graph))
 print(groups)
 clusters = Clustering.graphDivision(Clustering(graph), groups)
@@ -384,7 +394,7 @@ for i in range(100): # Количество передач данных
 for i in range(len(groups)):
     print(groups[i][-1], clusters[i].nodes[groups[i][-1]])
 DrawGraph.drawTheEntireGraph(DrawGraph(graph, sample))
-DrawGraph.drawClusters(DrawGraph(graph, sample), groups)
+DrawGraph.drawClusters(DrawGraph(graph, sample), groups, clusters)
 DrawGraph.drawCmap(clusters, sample)
 
 ProbabilityDependencies.dependencyGraphs()
